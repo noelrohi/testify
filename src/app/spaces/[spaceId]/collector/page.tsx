@@ -1,7 +1,7 @@
+import { api } from "@/trpc/server";
 import type { SearchParams } from "nuqs/server";
 import { SpaceCollectPage } from "./page.client";
 import { loadSearchParams } from "./search-params";
-import { api } from "@/trpc/server";
 
 type PageProps = {
   params: Promise<{

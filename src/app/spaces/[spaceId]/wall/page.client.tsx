@@ -8,8 +8,8 @@ import { useTRPC } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { MessageSquareQuote } from "lucide-react";
-import type { WallSearchParams } from "./search-params";
 import Link from "next/link";
+import type { WallSearchParams } from "./search-params";
 
 function WallLoadingSkeleton({
   backgroundColor,

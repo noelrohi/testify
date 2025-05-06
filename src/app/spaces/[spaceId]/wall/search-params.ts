@@ -1,4 +1,4 @@
-import { createLoader, parseAsString, type inferParserType } from "nuqs/server";
+import { createLoader, type inferParserType, parseAsString } from "nuqs/server";
 
 export const wallSearchParams = {
   backgroundColor: parseAsString,

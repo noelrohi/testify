@@ -1,6 +1,6 @@
+import type { SearchParams } from "nuqs/server";
 import { z } from "zod";
 import { WallWidget } from "./page.client";
-import type { SearchParams } from "nuqs/server";
 import { loadSearchParams } from "./search-params";
 
 type Page = {

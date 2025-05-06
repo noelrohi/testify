@@ -4,15 +4,15 @@ import { AddTestimonyDialog } from "@/components/spaces/add-testimony.dialog";
 import { EditSpaceDialog } from "@/components/spaces/edit-space.dialog";
 import { PublishTestimonyDialog } from "@/components/spaces/publish-testimony.dialog";
 import { TestimonialCard } from "@/components/spaces/testimonial-card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CodeBlock } from "@/components/ui/code-block";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { env } from "@/env";
 import { useTRPC } from "@/lib/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { FolderOpen } from "lucide-react";
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CodeBlock } from "@/components/ui/code-block";
 
 export function SpacePage({ spaceId }: { spaceId: string }) {
   const trpc = useTRPC();

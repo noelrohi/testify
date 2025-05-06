@@ -1,9 +1,9 @@
 "use client";
 
-import { cn } from "@/lib/utils"; // Assuming you have a utility for class names
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils"; // Assuming you have a utility for class names
 import { Check, Copy } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { HTMLAttributes } from "react"; // Use type import
 
 interface CodeBlockProps extends HTMLAttributes<HTMLElement> {
