@@ -5,6 +5,7 @@ import { TrpcReactProvider } from "@/trpc/react";
 import type { Metadata } from "next";
 import { Funnel_Display, Lexend_Deca } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { ThemeProvider } from "next-themes";
 
 export const metadata: Metadata = {
   title: {
@@ -36,9 +37,16 @@ export default function RootLayout({
       className={`${funnel_display.variable} ${lexend_deca.variable}`}
     >
       <body>
-        <TrpcReactProvider>
-          <NuqsAdapter>{children}</NuqsAdapter>
-        </TrpcReactProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TrpcReactProvider>
+            <NuqsAdapter>{children}</NuqsAdapter>
+          </TrpcReactProvider>
+        </ThemeProvider>
         <Toaster />
       </body>
     </html>

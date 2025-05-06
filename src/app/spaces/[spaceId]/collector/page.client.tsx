@@ -46,6 +46,8 @@ const formSchema = z.object({
   text: z.string().min(1, { message: "Testimonial text is required." }),
   socialUrl: z.string().url({ message: "Please enter a valid URL." }),
   imageUrl: z.string().url({ message: "Please enter a valid URL." }).optional(),
+  position: z.string().optional(),
+  companyName: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -66,6 +68,8 @@ export function SpaceCollectPage({
       authorName: "",
       text: "",
       socialUrl: "",
+      position: "",
+      companyName: "",
     },
   });
 
@@ -100,8 +104,10 @@ export function SpaceCollectPage({
       spaceId,
       authorName: values.authorName.trim(),
       text: values.text.trim(),
-      socialUrl: values.socialUrl?.trim() || undefined,
+      socialUrl: values.socialUrl,
       imageUrl: values.imageUrl?.trim() || undefined,
+      position: values.position?.trim() || undefined,
+      companyName: values.companyName?.trim() || undefined,
     });
   };
 
@@ -145,20 +151,7 @@ export function SpaceCollectPage({
           </ul>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row items-center gap-4 pt-6">
-          <Button size="lg" variant="default" asChild>
-            <Link
-              href={GITHUB_REPO_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center"
-            >
-              <Star className="mr-2 h-4 w-4" />
-              Star on GitHub
-            </Link>
-          </Button>
-          {/* Dialog Trigger for Text Testimonial */}
           <Dialog
             open={isOpen}
             onOpenChange={(open) => {
@@ -260,6 +253,48 @@ export function SpaceCollectPage({
 
                   <FormField
                     control={form.control}
+                    name="position"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Position (Optional)</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g. Software Engineer"
+                            {...field}
+                            disabled={
+                              form.formState.isSubmitting ||
+                              createTestimonial.isPending
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="companyName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Company Name (Optional)</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g. Tech Solutions Inc."
+                            {...field}
+                            disabled={
+                              form.formState.isSubmitting ||
+                              createTestimonial.isPending
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
                     name="imageUrl"
                     render={({ field: { value, onChange, ...fieldProps } }) => (
                       <FormItem>
@@ -268,6 +303,7 @@ export function SpaceCollectPage({
                           <Input
                             {...fieldProps}
                             type="url"
+                            placeholder="https://github.com/shadcn.png"
                             value={value}
                             onChange={onChange}
                             disabled={

@@ -1,6 +1,6 @@
 "use client";
 
-import { Marquee } from "@/components/marquee";
+import { Marquee } from "@/components/magicui/marquee";
 import { TestimonialCard } from "@/components/spaces/testimonial-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { APP_DOMAIN, APP_URL } from "@/constants";

@@ -34,6 +34,8 @@ const addTestimonySchema = z.object({
   text: z.string().min(1, "Your testimonial cannot be empty"),
   socialUrl: z.string().url("Please enter a valid URL"),
   imageUrl: z.string().url("Please enter a valid URL").optional(),
+  position: z.string().optional(),
+  companyName: z.string().optional(),
 });
 
 type AddTestimonyFormValues = z.infer<typeof addTestimonySchema>;
@@ -54,6 +56,8 @@ export function AddTestimonyDialog({ spaceId }: AddTestimonyDialogProps) {
       authorName: "",
       socialUrl: "",
       imageUrl: "",
+      position: "",
+      companyName: "",
     },
   });
 
@@ -150,6 +154,32 @@ export function AddTestimonyDialog({ spaceId }: AddTestimonyDialogProps) {
                       placeholder="https://twitter.com/johndoe"
                       {...field}
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="position"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Position (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. CEO, Founder" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="companyName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Company Name (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. Acme Inc." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

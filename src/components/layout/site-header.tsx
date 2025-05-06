@@ -5,6 +5,7 @@ import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
+import { ModeToggle } from "./mode-toggle";
 
 export function SiteHeader() {
   const [isPending, startTransition] = useTransition();
@@ -36,7 +37,8 @@ export function SiteHeader() {
             </Link>
           </nav>
         </div>
-        <div>
+        <div className="flex items-center gap-2">
+          <ModeToggle />
           <Button onClick={handleLogout} variant="outline" disabled={isPending}>
             {isPending ? "Logging out..." : "Logout"}
           </Button>

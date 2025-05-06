@@ -60,9 +60,11 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-[var(--foreground)] italic">"{testimonial.text}"</p>
+        <div className="flex justify-between">
+          <p className="text-foreground italic">"{testimonial.text}"</p>
+          {children}
+        </div>
       </CardContent>
-      {children && <CardFooter className="pt-4">{children}</CardFooter>}
     </Card>
   );
 };

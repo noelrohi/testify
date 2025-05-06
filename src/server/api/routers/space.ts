@@ -80,8 +80,10 @@ export const spaceRouter = createTRPCRouter({
         spaceId: z.string(),
         text: z.string().min(1),
         authorName: z.string().min(1),
-        socialUrl: z.string().optional(),
+        socialUrl: z.string(),
         imageUrl: z.string().url().optional(),
+        companyName: z.string().optional(),
+        position: z.string().optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -94,13 +96,7 @@ export const spaceRouter = createTRPCRouter({
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
       try {
-        const testimony = await db.insert(TESTIMONIAL).values({
-          spaceId: input.spaceId,
-          text: input.text,
-          authorName: input.authorName,
-          socialUrl: input.socialUrl ?? "",
-          imageUrl: input.imageUrl,
-        });
+        const testimony = await db.insert(TESTIMONIAL).values(input);
 
         return testimony;
       } catch (error) {

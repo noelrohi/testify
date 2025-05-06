@@ -69,8 +69,7 @@ export function PublishTestimonyDialog({
         <DialogHeader>
           <DialogTitle>Publish Testimonial?</DialogTitle>
           <DialogDescription>
-            Are you sure you want to publish this testimonial? It will become
-            visible on your public Wall of Love.
+            Are you sure you want to publish this testimonial?
           </DialogDescription>
         </DialogHeader>
         <div className="my-4 rounded border bg-muted/40 p-4 text-sm italic">

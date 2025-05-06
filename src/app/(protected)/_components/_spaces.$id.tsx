@@ -14,6 +14,26 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { FolderOpen } from "lucide-react";
 import Link from "next/link";
 
+const testify_sdk_usage = (
+  spaceId: string,
+) => `import { Testify } from "@trytestify/sdk";
+
+const testify = new Testify();
+
+async function run() {
+  const result = await testify.testimonials.get({
+    spaceId: "${spaceId}",
+  });
+
+  // Handle the result (e.g., display testimonials)
+  console.log(result);
+  if (result.testimonials) {
+    // Process result.testimonials array
+  }
+}
+
+run();`;
+
 export function SpacePage({ spaceId }: { spaceId: string }) {
   const trpc = useTRPC();
   const { data: spaceData } = useSuspenseQuery(
@@ -53,7 +73,7 @@ export function SpacePage({ spaceId }: { spaceId: string }) {
       <Tabs defaultValue="testimonials" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
-          <TabsTrigger value="widgets">Widgets</TabsTrigger>
+          <TabsTrigger value="snippets">Snippets</TabsTrigger>
         </TabsList>
 
         {/* Testimonials Tab */}
@@ -86,8 +106,8 @@ export function SpacePage({ spaceId }: { spaceId: string }) {
           )}
         </TabsContent>
 
-        {/* Widgets Tab */}
-        <TabsContent value="widgets" className="mt-4 space-y-4">
+        {/* Snippets Tab */}
+        <TabsContent value="snippets" className="mt-4 space-y-4">
           {/* Link to Iframe Test Page */}
           <div className="mb-4 rounded-md border bg-secondary p-4 text-secondary-foreground">
             <p className="text-sm">
@@ -118,6 +138,23 @@ export function SpacePage({ spaceId }: { spaceId: string }) {
                 This iframe loads content directly from{" "}
                 <code>${wallIframeUrl}</code>.
               </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>SDK Usage</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-4 text-[var(--muted-foreground)] text-sm">
+                Use our SDK to fetch and display testimonials directly in your
+                application.
+              </p>
+              {/* TODO: Add SDK Usage Content */}
+              <CodeBlock
+                code={testify_sdk_usage(spaceId)}
+                language="typescript"
+              />
             </CardContent>
           </Card>
         </TabsContent>
