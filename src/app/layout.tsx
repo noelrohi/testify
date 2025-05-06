@@ -8,8 +8,8 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 export const metadata: Metadata = {
   title: {
-    default: "Trustify",
-    template: "%s | Trustify",
+    default: "Testify",
+    template: "%s | Testify",
   },
   description: "Get testimonials from your customers for free",
   icons: [{ rel: "icon", url: "/favicon.ico" }],

@@ -25,7 +25,7 @@ export function SiteHeader() {
       <div className="flex h-14 items-center justify-between px-4 lg:container lg:mx-auto">
         <div className="flex items-center gap-4">
           <h1 className="font-semibold text-2xl text-foreground tracking-tight font-display">
-            Trustify
+            Testify
           </h1>
           <nav className="ml-4">
             <Link

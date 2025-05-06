@@ -111,7 +111,7 @@ export function SpaceCollectPage({
       <div className="flex w-full items-center justify-start mb-8">
         <div className="flex items-center gap-2">
           <h1 className="font-semibold text-2xl text-foreground tracking-tight font-display">
-            Trustify
+            Testify
           </h1>
         </div>
       </div>
