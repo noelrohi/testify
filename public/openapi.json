@@ -1,0 +1,114 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Testify.xyz API",
+    "version": "1.0.0",
+    "description": "API documentation for Testify.xyz"
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "Current environment"
+    }
+  ],
+  "paths": {
+    "/testimonials": {
+      "get": {
+        "summary": "Get published testimonials",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "in": "query",
+            "required": true,
+            "description": "ID of the space to fetch testimonials for",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of testimonials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "testimonials": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string", "format": "cuid2" },
+                          "authorName": { "type": "string" },
+                          "text": { "type": "string" },
+                          "socialUrl": { "type": "string", "format": "url" },
+                          "imageUrl": {
+                            "type": "string",
+                            "format": "url",
+                            "nullable": true
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "isPublished": { "type": "boolean" },
+                          "spaceId": { "type": "string", "format": "cuid2" }
+                        },
+                        "required": [
+                          "id",
+                          "authorName",
+                          "text",
+                          "socialUrl",
+                          "createdAt",
+                          "updatedAt",
+                          "isPublished",
+                          "spaceId"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Missing spaceId",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Space ID is required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
