@@ -1,19 +1,12 @@
-import {
-  type MiddlewareConfig,
-  type NextRequest,
-  NextResponse,
-} from "next/server";
-import { auth } from "./lib/auth";
-import { headers } from "next/headers";
+import { getSessionCookie } from "better-auth/cookies";
+import { type NextRequest, NextResponse } from "next/server";
 
 const publicRootPaths = ["/"];
 const protectedPrefixes = ["/dashboard", "/sandbox"];
 const authPaths = ["/login", "/signup"];
 
 export async function middleware(request: NextRequest) {
-  const sessionCookie = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const sessionCookie = getSessionCookie(request);
   const { pathname } = request.nextUrl;
 
   // Check if the user is trying to access a protected route
@@ -41,7 +34,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  runtime: "nodejs",
   matcher: [
     ...publicRootPaths,
     /*
