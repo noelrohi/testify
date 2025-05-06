@@ -6,7 +6,9 @@ import { user } from "./auth";
 export const TESTIMONIAL = pgTable(
   "testimonial",
   {
-    id: text("id").primaryKey().default(createId()),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
     authorName: text("author_name").notNull(),
     text: text("text").notNull(),
     socialUrl: text("social_url").notNull(),
@@ -35,7 +37,9 @@ export const TESTIMONIAL_RELATIONS = relations(TESTIMONIAL, ({ one }) => ({
 export const SPACE = pgTable(
   "space",
   {
-    id: text("id").primaryKey().default(createId()),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
     name: text("name").notNull(),
     customMessage: text("custom_message").notNull(),
     logo: text("logo"),
