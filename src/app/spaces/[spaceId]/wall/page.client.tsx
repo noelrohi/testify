@@ -71,7 +71,7 @@ export function WallWidget({
   if (error || !data || data.name === "Not Found") {
     return (
       <div
-        className="flex min-h-screen items-center justify-center text-red-600"
+        className="flex min-h-screen items-center justify-center"
         data-background-color={backgroundColor}
         style={{ backgroundColor }}
       >
@@ -84,7 +84,7 @@ export function WallWidget({
   if (data.testimonials.length === 0) {
     return (
       <div
-        className="flex min-h-screen flex-col items-center justify-center text-gray-500"
+        className="flex min-h-screen flex-col items-center justify-center"
         data-background-color={backgroundColor}
         style={{ backgroundColor }}
       >
@@ -122,13 +122,13 @@ export function WallWidget({
         <div
           className={cn(
             "pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-background",
-            "from-neutral-100/60",
+            "from-background",
           )}
         />
         <div
           className={cn(
             "pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-background",
-            "from-neutral-100/60",
+            "from-background",
           )}
         />
       </div>
