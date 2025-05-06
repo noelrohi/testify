@@ -1,7 +1,6 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
 
-const publicRootPaths = ["/"];
 const protectedPrefixes = ["/dashboard", "/sandbox"];
 const authPaths = ["/login", "/signup"];
 
@@ -35,7 +34,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    ...publicRootPaths,
     /*
      * Match all request paths except for the ones starting with:
      * - api (API routes)
