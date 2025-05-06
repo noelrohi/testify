@@ -1,38 +1,49 @@
-import { getSessionCookie } from "better-auth/cookies";
-import { type NextRequest, NextResponse } from "next/server";
+import {
+  type MiddlewareConfig,
+  type NextRequest,
+  NextResponse,
+} from "next/server";
+import { auth } from "./lib/auth";
+import { headers } from "next/headers";
 
-const protectedPrefixes = ["/dashboard", "/sandbox"];
 const publicRootPaths = ["/"];
+const protectedPrefixes = ["/dashboard", "/sandbox"];
 const authPaths = ["/login", "/signup"];
 
 export async function middleware(request: NextRequest) {
-  const sessionCookie = getSessionCookie(request);
-  const pathname = request.nextUrl.pathname;
+  const sessionCookie = await auth.api.getSession({
+    headers: await headers(),
+  });
+  const { pathname } = request.nextUrl;
 
-  if (sessionCookie && authPaths.includes(pathname)) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
-  const isProtectedPrefix = protectedPrefixes.some((prefix) =>
+  // Check if the user is trying to access a protected route
+  const isAccessingProtected = protectedPrefixes.some((prefix) =>
     pathname.startsWith(prefix),
   );
 
-  const isRootDynamicProtected =
-    /^\/[^\/]+$/.test(pathname) &&
-    !publicRootPaths.includes(pathname) &&
-    !pathname.startsWith("/spaces/");
+  // Check if the user is trying to access an auth route
+  const isAccessingAuth = authPaths.includes(pathname);
 
-  const isProtectedRoute = isProtectedPrefix || isRootDynamicProtected;
-
-  if (!sessionCookie && isProtectedRoute) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  if (!sessionCookie) {
+    // Redirect unauthenticated users trying to access protected routes to /login
+    if (isAccessingProtected) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+  } else {
+    // Redirect authenticated users trying to access auth routes to /dashboard
+    if (isAccessingAuth) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
   }
 
+  // Allow the request to proceed
   return NextResponse.next();
 }
 
 export const config = {
+  runtime: "nodejs",
   matcher: [
+    ...publicRootPaths,
     /*
      * Match all request paths except for the ones starting with:
      * - api (API routes)
