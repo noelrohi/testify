@@ -160,7 +160,7 @@ export function AddTestimonyDialog({ spaceId }: AddTestimonyDialogProps) {
               name="imageUrl"
               render={({ field: { onChange, value, ...fieldProps } }) => (
                 <FormItem>
-                  <FormLabel>Your Avatar</FormLabel>
+                  <FormLabel>Profile Picture Url</FormLabel>
                   <FormControl>
                     <Input
                       type="url"
