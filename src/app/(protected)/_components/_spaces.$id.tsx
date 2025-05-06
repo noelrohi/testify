@@ -11,8 +11,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { env } from "@/env";
 import { useTRPC } from "@/lib/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { FolderOpen } from "lucide-react";
+import { FolderOpen, Copy as CopyIcon, Check } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useState, useEffect } from "react";
 
 const testify_sdk_usage = (
   spaceId: string,
@@ -40,6 +43,7 @@ export function SpacePage({ spaceId }: { spaceId: string }) {
     trpc.space.getOne.queryOptions({ id: spaceId }),
   );
   const wallIframeUrl = `${env.NEXT_PUBLIC_APP_URL}/spaces/${spaceId}/wall?backgroundColor=F5F1EB&cardColor=fffdfa`;
+  const collectorPageUrl = `${env.NEXT_PUBLIC_APP_URL}/spaces/${spaceId}/collector`;
 
   const wallEmbedCode = `<iframe
   src="${wallIframeUrl}"
@@ -49,6 +53,25 @@ export function SpacePage({ spaceId }: { spaceId: string }) {
   loading="eager"
   style="background-color: #F5F1EB;"
 ></iframe>`;
+
+  const [isCopiedCollectorUrl, setIsCopiedCollectorUrl] = useState(false);
+
+  const handleCollectorUrlCopy = async (textToCopy: string) => {
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      setIsCopiedCollectorUrl(true);
+      toast.success("Copied to clipboard!");
+    } catch (err) {
+      toast.error("Failed to copy.");
+    }
+  };
+
+  useEffect(() => {
+    if (isCopiedCollectorUrl) {
+      const timer = setTimeout(() => setIsCopiedCollectorUrl(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isCopiedCollectorUrl]);
 
   return (
     <div className="flex-1 overflow-y-auto p-4 lg:container lg:mx-auto">
@@ -80,11 +103,11 @@ export function SpacePage({ spaceId }: { spaceId: string }) {
         <TabsContent value="testimonials" className="mt-4">
           {spaceData.testimonials.length === 0 ? (
             <div className="flex h-[400px] flex-col items-center justify-center rounded-md border p-8 text-center">
-              <FolderOpen className="mb-4 h-16 w-16 text-[var(--muted-foreground)]" />
-              <h2 className="mb-2 font-semibold text-[var(--foreground)] text-xl">
+              <FolderOpen className="mb-4 h-16 w-16 text-muted-foreground" />
+              <h2 className="mb-2 font-semibold text-foreground text-xl">
                 No testimonials yet
               </h2>
-              <p className="mb-4 text-[var(--muted-foreground)]">
+              <p className="mb-4 text-muted-foreground">
                 Add your first testimonial to get started.
               </p>
               <AddTestimonyDialog spaceId={spaceId} />
@@ -122,19 +145,56 @@ export function SpacePage({ spaceId }: { spaceId: string }) {
             </p>
           </div>
 
+          {/* Collector Page Link Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Collector Page Link</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-4 text-muted-foreground text-sm">
+                Share this link with your users to collect testimonials.
+              </p>
+              <div className="flex items-center space-x-2 rounded-md border bg-muted p-3">
+                <Link
+                  href={collectorPageUrl}
+                  target="_blank"
+                  className="flex-grow truncate text-sm font-medium text-primary hover:underline"
+                >
+                  {collectorPageUrl}
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleCollectorUrlCopy(collectorPageUrl)}
+                  title="Copy collector page link"
+                >
+                  {isCopiedCollectorUrl ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <CopyIcon className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+              <p className="mt-4 text-muted-foreground text-xs">
+                This link directs users to the testimonial submission form for
+                this space.
+              </p>
+            </CardContent>
+          </Card>
+
           {/* Embed Wall Card */}
           <Card>
             <CardHeader>
               <CardTitle>Embed Your Wall of Love</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="mb-4 text-[var(--muted-foreground)] text-sm">
+              <p className="mb-4 text-muted-foreground text-sm">
                 Copy and paste this iframe code snippet into your website's HTML
                 where you want the Wall of Love to appear. This method directly
                 embeds the public wall page and is self-contained.
               </p>
               <CodeBlock code={wallEmbedCode} language="html" />
-              <p className="mt-4 text-[var(--muted-foreground)] text-xs">
+              <p className="mt-4 text-muted-foreground text-xs">
                 This iframe loads content directly from{" "}
                 <code>${wallIframeUrl}</code>.
               </p>
@@ -146,11 +206,10 @@ export function SpacePage({ spaceId }: { spaceId: string }) {
               <CardTitle>SDK Usage</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="mb-4 text-[var(--muted-foreground)] text-sm">
+              <p className="mb-4 text-muted-foreground text-sm">
                 Use our SDK to fetch and display testimonials directly in your
                 application.
               </p>
-              {/* TODO: Add SDK Usage Content */}
               <CodeBlock
                 code={testify_sdk_usage(spaceId)}
                 language="typescript"
