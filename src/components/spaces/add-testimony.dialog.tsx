@@ -101,7 +101,7 @@ export function AddTestimonyDialog({ spaceId }: AddTestimonyDialogProps) {
       <DialogTrigger asChild>
         <Button size="sm">
           <PlusIcon className="mr-1.5 size-4" />
-          <span>Add a text</span>
+          <span>Add</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">

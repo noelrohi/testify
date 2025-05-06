@@ -1,6 +1,7 @@
 "use client";
 
 import { AddTestimonyDialog } from "@/components/spaces/add-testimony.dialog";
+import { CopyCollectorButton } from "@/components/spaces/copy-collector.button";
 import { EditSpaceDialog } from "@/components/spaces/edit-space.dialog";
 import { PublishTestimonyDialog } from "@/components/spaces/publish-testimony.dialog";
 import { TestimonialCard } from "@/components/spaces/testimonial-card";
@@ -11,11 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { env } from "@/env";
 import { useTRPC } from "@/lib/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { FolderOpen, Copy as CopyIcon, Check } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { useState, useEffect } from "react";
+import { FolderOpen } from "lucide-react";
 
 const testify_sdk_usage = (
   spaceId: string,
@@ -43,7 +40,6 @@ export function SpacePage({ spaceId }: { spaceId: string }) {
     trpc.space.getOne.queryOptions({ id: spaceId }),
   );
   const wallIframeUrl = `${env.NEXT_PUBLIC_APP_URL}/spaces/${spaceId}/wall?backgroundColor=F5F1EB&cardColor=fffdfa`;
-  const collectorPageUrl = `${env.NEXT_PUBLIC_APP_URL}/spaces/${spaceId}/collector`;
 
   const wallEmbedCode = `<iframe
   src="${wallIframeUrl}"
@@ -53,25 +49,6 @@ export function SpacePage({ spaceId }: { spaceId: string }) {
   loading="eager"
   style="background-color: #F5F1EB;"
 ></iframe>`;
-
-  const [isCopiedCollectorUrl, setIsCopiedCollectorUrl] = useState(false);
-
-  const handleCollectorUrlCopy = async (textToCopy: string) => {
-    try {
-      await navigator.clipboard.writeText(textToCopy);
-      setIsCopiedCollectorUrl(true);
-      toast.success("Copied to clipboard!");
-    } catch (err) {
-      toast.error("Failed to copy.");
-    }
-  };
-
-  useEffect(() => {
-    if (isCopiedCollectorUrl) {
-      const timer = setTimeout(() => setIsCopiedCollectorUrl(false), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [isCopiedCollectorUrl]);
 
   return (
     <div className="flex-1 overflow-y-auto p-4 lg:container lg:mx-auto">
@@ -88,6 +65,7 @@ export function SpacePage({ spaceId }: { spaceId: string }) {
         </div>
         <div className="flex items-center gap-2">
           <AddTestimonyDialog spaceId={spaceId} />
+          <CopyCollectorButton spaceId={spaceId} />
           <EditSpaceDialog spaceId={spaceId} />
         </div>
       </div>
@@ -129,60 +107,7 @@ export function SpacePage({ spaceId }: { spaceId: string }) {
           )}
         </TabsContent>
 
-        {/* Snippets Tab */}
         <TabsContent value="snippets" className="mt-4 space-y-4">
-          {/* Link to Iframe Test Page */}
-          <div className="mb-4 rounded-md border bg-secondary p-4 text-secondary-foreground">
-            <p className="text-sm">
-              Want to see how the collector and wall look in an iframe?{" "}
-              <Link
-                href={`/sandbox/${spaceId}`}
-                className="font-medium text-primary underline underline-offset-4 hover:text-primary/80"
-              >
-                Test iframe embedding here
-              </Link>
-              .
-            </p>
-          </div>
-
-          {/* Collector Page Link Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Collector Page Link</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-4 text-muted-foreground text-sm">
-                Share this link with your users to collect testimonials.
-              </p>
-              <div className="flex items-center space-x-2 rounded-md border bg-muted p-3">
-                <Link
-                  href={collectorPageUrl}
-                  target="_blank"
-                  className="flex-grow truncate text-sm font-medium text-primary hover:underline"
-                >
-                  {collectorPageUrl}
-                </Link>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleCollectorUrlCopy(collectorPageUrl)}
-                  title="Copy collector page link"
-                >
-                  {isCopiedCollectorUrl ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <CopyIcon className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-              <p className="mt-4 text-muted-foreground text-xs">
-                This link directs users to the testimonial submission form for
-                this space.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Embed Wall Card */}
           <Card>
             <CardHeader>
               <CardTitle>Embed Your Wall of Love</CardTitle>
