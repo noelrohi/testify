@@ -32,11 +32,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${funnel_display.variable} ${lexend_deca.variable}`}
-    >
-      <body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${funnel_display.variable} ${lexend_deca.variable}`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
