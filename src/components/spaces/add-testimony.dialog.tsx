@@ -1,0 +1,213 @@
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { orpc } from "@/utils/orpc";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2, Pencil, PlusIcon } from "lucide-react";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
+const addTestimonySchema = z.object({
+  authorName: z.string().min(1, "Your name cannot be empty"),
+  text: z.string().min(1, "Your testimonial cannot be empty"),
+  socialUrl: z.string().url("Please enter a valid URL"),
+  photoBase64: z.string().min(1, "Please upload your avatar"),
+});
+
+type AddTestimonyFormValues = z.infer<typeof addTestimonySchema>;
+
+interface AddTestimonyDialogProps {
+  spaceId: string; // Required prop to associate testimony with a space
+}
+
+export function AddTestimonyDialog({ spaceId }: AddTestimonyDialogProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const queryClient = useQueryClient();
+  const form = useForm<AddTestimonyFormValues>({
+    resolver: zodResolver(addTestimonySchema),
+    defaultValues: {
+      text: "",
+      authorName: "",
+    },
+  });
+
+  const createTestimonialMutation = useMutation(
+    orpc.space.createTestimonial.mutationOptions(),
+  );
+
+  async function onSubmit(values: AddTestimonyFormValues) {
+    startTransition(async () => {
+      try {
+        await createTestimonialMutation.mutateAsync({
+          ...values,
+          spaceId,
+        });
+        toast.success("Testimonial added successfully");
+        setIsOpen(false);
+        form.reset();
+        // Invalidate the query for the specific space to refresh the list
+        await queryClient.invalidateQueries({
+          queryKey: orpc.space.getOne.queryOptions({ input: { id: spaceId } })
+            .queryKey,
+        });
+      } catch (error) {
+        console.error("Failed to add testimonial:", error);
+        toast.error(
+          "Failed to add testimonial. Please check console for details.",
+        );
+      }
+    });
+  }
+
+  return (
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) {
+          form.reset();
+        }
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button size="sm">
+          <PlusIcon className="mr-1.5 size-4" />
+          <span>Add a text</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Add Text Testimonial</DialogTitle>
+          <DialogDescription>
+            Enter the details for the new testimonial.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="authorName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Your Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="John Doe" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="text"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Your Testimonial</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Enter the testimonial here..."
+                      className="resize-none"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="socialUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Social URL</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="https://twitter.com/johndoe"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="photoBase64"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Your Avatar</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      required
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            form.setValue(
+                              "photoBase64",
+                              reader.result as string,
+                            );
+                          };
+                          reader.readAsDataURL(file);
+                        } else {
+                          form.setValue("photoBase64", "");
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsOpen(false);
+                  form.reset();
+                }}
+                disabled={isPending}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending ? (
+                  <>
+                    <Loader2 className="mr-2 size-4 animate-spin" /> Adding
+                  </>
+                ) : (
+                  "Add Testimonial"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
