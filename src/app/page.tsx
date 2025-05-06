@@ -1,5 +1,6 @@
 import { FeaturesSectionWithHoverEffects } from "@/components/blocks/feature-section-with-hover-effects";
 import { Button } from "@/components/ui/button"; // Assuming Button component exists
+import { APP_DOMAIN } from "@/constants";
 import {
   ComputerIcon,
   GiftIcon,
@@ -58,10 +59,10 @@ export default function LandingPage() {
       <header className="px-4 lg:px-6 h-14 flex items-center border-b">
         <Link
           href="#"
-          className="flex items-center justify-center font-display font-semibold text-2xl"
+          className="flex items-center justify-center font-display font-semibold text-2xl lowercase"
           prefetch={false}
         >
-          Testify.xyz
+          {APP_DOMAIN}
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6 items-center">
           <Link
