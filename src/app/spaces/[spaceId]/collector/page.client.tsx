@@ -45,20 +45,10 @@ const formSchema = z.object({
   authorName: z.string().min(1, { message: "Name is required." }),
   text: z.string().min(1, { message: "Testimonial text is required." }),
   socialUrl: z.string().url({ message: "Please enter a valid URL." }),
-  image: z.string().optional(),
+  imageUrl: z.string().url({ message: "Please enter a valid URL." }).optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
-
-// Helper function to convert File to Base64 asynchronously
-const convertFileToBase64Async = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = (error) => reject(error);
-  });
-};
 
 export function SpaceCollectPage({
   spaceId,
@@ -76,7 +66,6 @@ export function SpaceCollectPage({
       authorName: "",
       text: "",
       socialUrl: "",
-      image: undefined, // Default for FileList
     },
   });
 
@@ -112,7 +101,7 @@ export function SpaceCollectPage({
       authorName: values.authorName.trim(),
       text: values.text.trim(),
       socialUrl: values.socialUrl?.trim() || undefined,
-      photoBase64: values.image,
+      imageUrl: values.imageUrl?.trim() || undefined,
     });
   };
 
@@ -271,23 +260,16 @@ export function SpaceCollectPage({
 
                   <FormField
                     control={form.control}
-                    name="image"
+                    name="imageUrl"
                     render={({ field: { value, onChange, ...fieldProps } }) => (
                       <FormItem>
-                        <FormLabel>Your Photo (Optional)</FormLabel>
+                        <FormLabel>Profile Picture URL (Optional)</FormLabel>
                         <FormControl>
                           <Input
                             {...fieldProps}
-                            type="file"
-                            accept={ACCEPTED_IMAGE_TYPES.join(",")}
-                            onChange={async (event) => {
-                              const file = event.target.files?.[0];
-                              if (file) {
-                                const base64 =
-                                  await convertFileToBase64Async(file);
-                                form.setValue("image", base64);
-                              }
-                            }}
+                            type="url"
+                            value={value}
+                            onChange={onChange}
                             disabled={
                               form.formState.isSubmitting ||
                               createTestimonial.isPending

@@ -10,7 +10,7 @@ export const TESTIMONIAL = pgTable(
     authorName: text("author_name").notNull(),
     text: text("text").notNull(),
     socialUrl: text("social_url").notNull(),
-    photoBase64: text("photo_base64"),
+    imageUrl: text("image_url"),
     createdAt: timestamp("created_at")
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),

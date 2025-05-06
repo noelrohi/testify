@@ -27,7 +27,7 @@ export function SiteHeader() {
           <h1 className="font-semibold text-2xl text-foreground tracking-tight font-display">
             Trustify
           </h1>
-          <nav>
+          <nav className="ml-4">
             <Link
               href="/dashboard"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"

@@ -81,7 +81,7 @@ export const spaceRouter = createTRPCRouter({
         text: z.string().min(1),
         authorName: z.string().min(1),
         socialUrl: z.string().optional(),
-        photoBase64: z.string().optional(),
+        imageUrl: z.string().url().optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -99,7 +99,7 @@ export const spaceRouter = createTRPCRouter({
           text: input.text,
           authorName: input.authorName,
           socialUrl: input.socialUrl ?? "",
-          photoBase64: input.photoBase64,
+          imageUrl: input.imageUrl,
         });
 
         return testimony;

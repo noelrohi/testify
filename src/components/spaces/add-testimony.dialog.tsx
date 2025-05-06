@@ -33,7 +33,7 @@ const addTestimonySchema = z.object({
   authorName: z.string().min(1, "Your name cannot be empty"),
   text: z.string().min(1, "Your testimonial cannot be empty"),
   socialUrl: z.string().url("Please enter a valid URL"),
-  photoBase64: z.string().min(1, "Please upload your avatar"),
+  imageUrl: z.string().url("Please enter a valid URL").optional(),
 });
 
 type AddTestimonyFormValues = z.infer<typeof addTestimonySchema>;
@@ -52,6 +52,8 @@ export function AddTestimonyDialog({ spaceId }: AddTestimonyDialogProps) {
     defaultValues: {
       text: "",
       authorName: "",
+      socialUrl: "",
+      imageUrl: "",
     },
   });
 
@@ -155,30 +157,17 @@ export function AddTestimonyDialog({ spaceId }: AddTestimonyDialogProps) {
             />
             <FormField
               control={form.control}
-              name="photoBase64"
-              render={({ field }) => (
+              name="imageUrl"
+              render={({ field: { onChange, value, ...fieldProps } }) => (
                 <FormItem>
                   <FormLabel>Your Avatar</FormLabel>
                   <FormControl>
                     <Input
-                      type="file"
-                      accept="image/*"
+                      type="url"
                       required
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            form.setValue(
-                              "photoBase64",
-                              reader.result as string,
-                            );
-                          };
-                          reader.readAsDataURL(file);
-                        } else {
-                          form.setValue("photoBase64", "");
-                        }
-                      }}
+                      onChange={onChange}
+                      value={value}
+                      {...fieldProps}
                     />
                   </FormControl>
                   <FormMessage />

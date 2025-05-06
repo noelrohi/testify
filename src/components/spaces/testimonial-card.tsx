@@ -34,7 +34,7 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
       <CardHeader className="flex flex-row items-center gap-3 space-y-0 pb-2">
         <Avatar className="h-10 w-10">
           <AvatarImage
-            src={testimonial.photoBase64 ?? undefined}
+            src={testimonial.imageUrl ?? undefined}
             alt={testimonial.authorName}
           />
           <AvatarFallback>
