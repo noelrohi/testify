@@ -114,7 +114,7 @@ export const spaceRouter = createTRPCRouter({
         id: z.string(),
         name: z.string(),
         customMessage: z.string(),
-        logo: z.string().url(),
+        logo: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {

@@ -41,7 +41,7 @@ const ACCEPTED_IMAGE_TYPES = [
 const editSpaceSchema = z.object({
   name: z.string().min(1, "Space name cannot be empty"),
   customMessage: z.string(),
-  logo: z.string(), // Keeping logo as string for base64
+  logo: z.string().optional(),
 });
 
 type EditSpaceFormValues = z.infer<typeof editSpaceSchema>;
@@ -88,7 +88,7 @@ export function EditSpaceDialog({ spaceId, trigger }: EditSpaceDialogProps) {
     }
   }, [spaceData, form, isOpen]);
 
-  const editSpaceMutation = useMutation(trpc.space.edit.mutationOptions()); // Use update mutation
+  const editSpaceMutation = useMutation(trpc.space.edit.mutationOptions());
 
   async function onSubmit(values: EditSpaceFormValues) {
     startTransition(async () => {
