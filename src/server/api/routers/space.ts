@@ -99,7 +99,7 @@ export const spaceRouter = createTRPCRouter({
           text: input.text,
           authorName: input.authorName,
           socialUrl: input.socialUrl ?? "",
-          photoBase64: input.photoBase64 ?? "",
+          photoBase64: input.photoBase64,
         });
 
         return testimony;
@@ -168,6 +168,8 @@ export const spaceRouter = createTRPCRouter({
           customMessage: true,
         },
       });
+
+      console.log("space", space);
 
       if (!space) {
         console.error(`Collector Config: Space not found: ${input.spaceId}`);

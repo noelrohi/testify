@@ -3,15 +3,13 @@
 import { Marquee } from "@/components/marquee";
 import { TestimonialCard } from "@/components/spaces/testimonial-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { APP_DOMAIN, APP_URL } from "@/constants";
 import { useTRPC } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { MessageSquareQuote } from "lucide-react";
-import { useTheme } from "next-themes";
-import type { Search } from "./page";
-
-const DOMAIN = "https://trustify.xyz";
-const URL = "https://trustify.xyz";
+import type { WallSearchParams } from "./search-params";
+import Link from "next/link";
 
 function WallLoadingSkeleton({
   backgroundColor,
@@ -48,15 +46,20 @@ export function WallWidget({
   search,
 }: {
   spaceId: string;
-  search: Search;
+  search: WallSearchParams;
 }) {
-  const backgroundColor = `#${search.backgroundColor}`;
-  const cardColor = `#${search.cardColor}`;
-  const cardBorderColor = `#${search.cardBorderColor}`;
-  const cardTextColor = `#${search.cardTextColor}`;
+  const backgroundColor = search.backgroundColor
+    ? `#${search.backgroundColor}`
+    : undefined;
+  const cardColor = search.cardColor ? `#${search.cardColor}` : undefined;
+  const cardBorderColor = search.cardBorderColor
+    ? `#${search.cardBorderColor}`
+    : undefined;
+  const cardTextColor = search.cardTextColor
+    ? `#${search.cardTextColor}`
+    : undefined;
   const trpc = useTRPC();
 
-  const { setTheme } = useTheme();
   const { data, isLoading, error } = useQuery(
     trpc.space.getWall.queryOptions({ spaceId }),
   );
@@ -131,14 +134,14 @@ export function WallWidget({
       </div>
       <div className="w-full text-center text-muted-foreground text-sm">
         Powered by{" "}
-        <a
+        <Link
           target="_blank"
           rel="noopener noreferrer"
-          href={URL}
+          href={APP_URL}
           className="underline"
         >
-          {DOMAIN} ❤️
-        </a>
+          {APP_DOMAIN} ❤️
+        </Link>
       </div>
     </div>
   );

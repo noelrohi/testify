@@ -2,22 +2,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { orpc } from "@/utils/orpc";
+import { useTRPC } from "@/lib/trpc";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-
 interface CollectorFormProps {
   spaceId: string;
   // TODO: Potentially fetch config like placeholders inside this component later
 }
 
 export function CollectorForm({ spaceId }: CollectorFormProps) {
+  const trpc = useTRPC();
   const [authorName, setAuthorName] = useState("");
   const [text, setText] = useState("");
 
   const createTestimonial = useMutation(
-    orpc.space.createTestimonial.mutationOptions({
+    trpc.space.createTestimonial.mutationOptions({
       onSuccess: () => {
         // Send success message to parent window
         window.parent.postMessage({ type: "testimnCollectorSuccess" }, "*");

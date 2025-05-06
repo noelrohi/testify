@@ -122,6 +122,11 @@ export function Dashboard() {
                           <DropdownMenuItem asChild>
                             <Link href={`/${space.id}`}>View Space</Link>
                           </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/spaces/${space.id}/collector`}>
+                              View Collector
+                            </Link>
+                          </DropdownMenuItem>
                           <DeleteSpaceDialog
                             spaceId={space.id}
                             spaceName={space.name}
