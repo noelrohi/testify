@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { orpc } from "@/utils/orpc";
+import { useTRPC } from "@/lib/trpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -29,9 +30,9 @@ export function PublishTestimonyDialog({
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const queryClient = useQueryClient();
-
+  const trpc = useTRPC();
   const publishMutation = useMutation(
-    orpc.space.publishTestimonial.mutationOptions(),
+    trpc.space.publishTestimonial.mutationOptions(),
   );
 
   const handlePublish = () => {
@@ -40,11 +41,10 @@ export function PublishTestimonyDialog({
         await publishMutation.mutateAsync({ id: testimonialId });
         toast.success("Testimonial published!");
         queryClient.invalidateQueries({
-          queryKey: orpc.space.getOne.queryOptions({ input: { id: spaceId } })
-            .queryKey,
+          queryKey: trpc.space.getOne.queryOptions({ id: spaceId }).queryKey,
         });
         queryClient.invalidateQueries({
-          queryKey: orpc.space.getAll.queryOptions().queryKey,
+          queryKey: trpc.space.getAll.queryOptions().queryKey,
         });
         setIsOpen(false);
       } catch (error) {

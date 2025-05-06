@@ -5,8 +5,8 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import type { TESTIMONIAL } from "@/server/db/schema";
 import type React from "react";
-import type { TESTIMONIAL } from "../../../../server/src/db/schema";
 
 interface TestimonialCardProps extends React.ComponentProps<typeof Card> {
   testimonial: typeof TESTIMONIAL.$inferSelect;

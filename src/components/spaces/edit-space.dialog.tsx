@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,7 +21,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { orpc } from "@/utils/orpc";
+import { useTRPC } from "@/lib/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react"; // Changed icon
@@ -27,6 +29,7 @@ import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const ACCEPTED_IMAGE_TYPES = [
   "image/jpeg",
@@ -53,10 +56,10 @@ export function EditSpaceDialog({ spaceId, trigger }: EditSpaceDialogProps) {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const queryClient = useQueryClient();
-
+  const trpc = useTRPC();
   // Fetch existing space data
   const { data: spaceData, isLoading: isLoadingSpace } = useQuery(
-    orpc.space.getOne.queryOptions({ input: { id: spaceId } }),
+    trpc.space.getOne.queryOptions({ id: spaceId }),
   );
 
   const form = useForm<EditSpaceFormValues>({
@@ -85,7 +88,7 @@ export function EditSpaceDialog({ spaceId, trigger }: EditSpaceDialogProps) {
     }
   }, [spaceData, form, isOpen]);
 
-  const editSpaceMutation = useMutation(orpc.space.edit.mutationOptions()); // Use update mutation
+  const editSpaceMutation = useMutation(trpc.space.edit.mutationOptions()); // Use update mutation
 
   async function onSubmit(values: EditSpaceFormValues) {
     startTransition(async () => {
@@ -100,11 +103,10 @@ export function EditSpaceDialog({ spaceId, trigger }: EditSpaceDialogProps) {
         setIsOpen(false);
         // Invalidate queries related to this space and the list of spaces
         queryClient.invalidateQueries({
-          queryKey: orpc.space.getOne.queryOptions({ input: { id: spaceId } })
-            .queryKey,
+          queryKey: trpc.space.getOne.queryOptions({ id: spaceId }).queryKey,
         });
         queryClient.invalidateQueries({
-          queryKey: orpc.space.getAll.queryOptions().queryKey,
+          queryKey: trpc.space.getAll.queryOptions().queryKey,
         });
         // No need to reset form here, useEffect handles it on close
       } catch (error) {
@@ -211,11 +213,12 @@ export function EditSpaceDialog({ spaceId, trigger }: EditSpaceDialogProps) {
                     <p className="mb-1 text-muted-foreground text-sm">
                       Current Logo Preview:
                     </p>
-                    <img
-                      src={logoPreview}
-                      alt="Logo preview"
-                      className="h-20 w-20 rounded-sm object-cover"
-                    />
+                    <Avatar className="h-20 w-20 rounded-sm">
+                      <AvatarImage src={logoPreview} alt="Logo preview" />
+                      <AvatarFallback className="rounded-sm">
+                        {form.getValues("name")?.charAt(0) || "?"}
+                      </AvatarFallback>
+                    </Avatar>
                   </div>
                 )}
               </FormItem>

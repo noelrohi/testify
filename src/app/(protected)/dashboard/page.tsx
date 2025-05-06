@@ -1,11 +1,12 @@
-import { db } from "@/server/db";
+import { api } from "@/trpc/server";
+import type { Metadata } from "next";
 import { Dashboard } from "../_components/dashboard";
 
+export const metadata: Metadata = {
+  title: "Dashboard",
+};
+
 export default async function Home() {
-  const spaces = await db.query.SPACE.findMany({
-    with: {
-      testimonials: true,
-    },
-  });
-  return <Dashboard spaces={spaces} />;
+  await api.space.getAll.prefetch();
+  return <Dashboard />;
 }

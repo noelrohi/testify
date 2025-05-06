@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,10 +20,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { orpc } from "@/utils/orpc";
+import { useTRPC } from "@/lib/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Pencil, PlusIcon } from "lucide-react";
+import { Loader2, PlusIcon } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -41,6 +43,7 @@ interface AddTestimonyDialogProps {
 }
 
 export function AddTestimonyDialog({ spaceId }: AddTestimonyDialogProps) {
+  const trpc = useTRPC();
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const queryClient = useQueryClient();
@@ -53,7 +56,7 @@ export function AddTestimonyDialog({ spaceId }: AddTestimonyDialogProps) {
   });
 
   const createTestimonialMutation = useMutation(
-    orpc.space.createTestimonial.mutationOptions(),
+    trpc.space.createTestimonial.mutationOptions(),
   );
 
   async function onSubmit(values: AddTestimonyFormValues) {
@@ -68,8 +71,7 @@ export function AddTestimonyDialog({ spaceId }: AddTestimonyDialogProps) {
         form.reset();
         // Invalidate the query for the specific space to refresh the list
         await queryClient.invalidateQueries({
-          queryKey: orpc.space.getOne.queryOptions({ input: { id: spaceId } })
-            .queryKey,
+          queryKey: trpc.space.getOne.queryOptions({ id: spaceId }).queryKey,
         });
       } catch (error) {
         console.error("Failed to add testimonial:", error);

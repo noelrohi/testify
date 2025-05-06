@@ -1,24 +1,27 @@
 import "@/styles/globals.css";
 
 import type { Metadata } from "next";
-import { Nunito_Sans, Outfit } from "next/font/google";
+import { Funnel_Display, Lexend_Deca, Outfit } from "next/font/google";
 
-import { TRPCReactProvider } from "@/trpc/react";
 import { Toaster } from "@/components/ui/sonner";
+import { TrpcReactProvider } from "@/trpc/react";
 
 export const metadata: Metadata = {
-  title: "Testify",
+  title: {
+    default: "Trustify",
+    template: "%s | Trustify",
+  },
   description: "Get testimonials from your customers for free",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-const outfit = Outfit({
+const funnel_display = Funnel_Display({
   subsets: ["latin"],
   weight: ["600"],
   variable: "--display-family",
 });
 
-const nunito_sans = Nunito_Sans({
+const lexend_deca = Lexend_Deca({
   subsets: ["latin"],
   weight: ["400"],
   variable: "--text-family",
@@ -28,12 +31,13 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${outfit.variable} ${nunito_sans.variable}`}>
+    <html
+      lang="en"
+      className={`${funnel_display.variable} ${lexend_deca.variable}`}
+    >
       <body>
-        <TRPCReactProvider>
-          {children}
-          <Toaster />
-        </TRPCReactProvider>
+        <TrpcReactProvider>{children}</TrpcReactProvider>
+        <Toaster />
       </body>
     </html>
   );

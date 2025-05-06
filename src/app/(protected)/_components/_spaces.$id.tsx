@@ -1,3 +1,5 @@
+"use client";
+
 import { AddTestimonyDialog } from "@/components/spaces/add-testimony.dialog";
 import { EditSpaceDialog } from "@/components/spaces/edit-space.dialog";
 import { PublishTestimonyDialog } from "@/components/spaces/publish-testimony.dialog";
@@ -5,13 +7,19 @@ import { TestimonialCard } from "@/components/spaces/testimonial-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { env } from "@/env";
+import { useTRPC } from "@/lib/trpc";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { FolderOpen } from "lucide-react";
 import Link from "next/link";
-import { SpaceWithTestimonials } from "./dashboard";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CodeBlock } from "@/components/ui/code-block";
 
-
-export function SpacePage({spaceId, spaceData}: {spaceId: string, spaceData: SpaceWithTestimonials}) {
-  const wallIframeUrl = `${env.VERCEL_URL}/spaces/${spaceId}/wall?backgroundColor=F5F1EB&cardColor=fffdfa`;
+export function SpacePage({ spaceId }: { spaceId: string }) {
+  const trpc = useTRPC();
+  const { data: spaceData } = useSuspenseQuery(
+    trpc.space.getOne.queryOptions({ id: spaceId }),
+  );
+  const wallIframeUrl = `${env.NEXT_PUBLIC_APP_URL}/spaces/${spaceId}/wall?backgroundColor=F5F1EB&cardColor=fffdfa`;
 
   const wallEmbedCode = `<iframe
   src="${wallIframeUrl}"
@@ -22,17 +30,17 @@ export function SpacePage({spaceId, spaceData}: {spaceId: string, spaceData: Spa
   style="background-color: #F5F1EB;"
 ></iframe>`;
 
-
   return (
     <div className="flex-1 overflow-y-auto p-4 lg:container lg:mx-auto">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between border-b pb-4">
         <div className="flex items-center gap-3">
-          <img
-            src={spaceData.logo ?? ""}
-            alt={spaceData.name}
-            className="h-12 w-12 rounded-md object-cover"
-          />
+          <Avatar className="h-12 w-12 rounded-md">
+            <AvatarImage src={spaceData.logo ?? ""} alt={spaceData.name} />
+            <AvatarFallback className="rounded-md">
+              {spaceData.name.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
           <h1 className="font-semibold text-2xl">{spaceData.name}</h1>
         </div>
         <div className="flex items-center gap-2">
@@ -105,7 +113,7 @@ export function SpacePage({spaceId, spaceData}: {spaceId: string, spaceData: Spa
                 where you want the Wall of Love to appear. This method directly
                 embeds the public wall page and is self-contained.
               </p>
-              <code className="language-html">{wallEmbedCode}</code>
+              <CodeBlock code={wallEmbedCode} language="html" />
               <p className="mt-4 text-[var(--muted-foreground)] text-xs">
                 This iframe loads content directly from{" "}
                 <code>${wallIframeUrl}</code>.

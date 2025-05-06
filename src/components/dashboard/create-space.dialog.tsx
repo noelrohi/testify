@@ -21,13 +21,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useTRPC } from "@/lib/trpc";
 // import { orpc } from "@/utils/orpc";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const ACCEPTED_IMAGE_TYPES = [
   "image/jpeg",
@@ -39,42 +42,42 @@ const ACCEPTED_IMAGE_TYPES = [
 const createSpaceSchema = z.object({
   name: z.string().min(1, "Space name cannot be empty"),
   customMessage: z.string(),
-  // Update logo schema for File input
-  logo: z.string(),
+  logo: z.string().optional(),
 });
 
 type CreateSpaceFormValues = z.infer<typeof createSpaceSchema>;
 
 export function CreateSpaceDialog() {
+  const trpc = useTRPC();
   const [isOpen, setIsOpen] = useState(false); // Control dialog open state
   const [logoPreview, setLogoPreview] = useState<string | null>(null); // State for logo preview
   const [isPending, startTransition] = useTransition();
-  // const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
   const form = useForm<CreateSpaceFormValues>({
     resolver: zodResolver(createSpaceSchema),
     defaultValues: {
       name: "",
       customMessage: "",
-      // Default value for FileList is handled by the input itself
     },
   });
+  const createSpaceMutation = useMutation(trpc.space.create.mutationOptions());
 
   // const createSpaceMutation = useMutation(orpc.space.create.mutationOptions());
 
   async function onSubmit(values: CreateSpaceFormValues) {
     startTransition(async () => {
       try {
-        // const result = await createSpaceMutation.mutateAsync({
-        //   logo: values.logo,
-        //   name: values.name,
-        //   customMessage: values.customMessage,
-        // });
+        const result = await createSpaceMutation.mutateAsync({
+          logo: values.logo,
+          name: values.name,
+          customMessage: values.customMessage,
+        });
         toast.success("Space created successfully");
         setIsOpen(false);
         form.reset();
-        // queryClient.invalidateQueries({
-        //   queryKey: orpc.space.getAll.queryOptions().queryKey,
-        // });
+        queryClient.invalidateQueries({
+          queryKey: trpc.space.getAll.queryOptions().queryKey,
+        });
         setLogoPreview(null);
       } catch (error) {
         toast.error("Failed to create space");
@@ -171,11 +174,10 @@ export function CreateSpaceDialog() {
               {/* Display Thumbnail Preview */}
               {logoPreview && (
                 <div className="mt-2">
-                  <img
-                    src={logoPreview}
-                    alt="Thumbnail preview"
-                    className="h-20 w-20 rounded-sm object-cover"
-                  />
+                  <Avatar className="h-20 w-20 rounded-sm">
+                    <AvatarImage src={logoPreview} alt="Thumbnail preview" />
+                    <AvatarFallback className="rounded-sm">?</AvatarFallback>
+                  </Avatar>
                 </div>
               )}
             </FormItem>

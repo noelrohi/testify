@@ -1,6 +1,7 @@
 "use client";
 import { CreateSpaceDialog } from "@/components/dashboard/create-space.dialog";
 import { DeleteSpaceDialog } from "@/components/dashboard/delete-space.dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -9,22 +10,28 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { SPACE, TESTIMONIAL } from "@/server/db/schema/space";
-import { Ellipsis, FolderPlus, Sparkles } from "lucide-react";
+import { useTRPC } from "@/lib/trpc";
+import { useQuery } from "@tanstack/react-query";
+import { Ellipsis, FolderPlus, Loader2, Sparkles } from "lucide-react";
 import Link from "next/link";
 
-type Space = typeof SPACE.$inferSelect;
-
-export interface SpaceWithTestimonials extends Space {
-  testimonials: (typeof TESTIMONIAL.$inferSelect)[];
-}
-
-export function Dashboard({ spaces }: { spaces: SpaceWithTestimonials[] }) {
+export function Dashboard() {
+  const trpc = useTRPC();
+  const { data: spaces, isLoading } = useQuery(
+    trpc.space.getAll.queryOptions(),
+  );
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[calc(100vh-64px)]">
+        <Loader2 className="animate-spin" />
+      </div>
+    );
+  }
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:container lg:mx-auto">
       <div className="space-y-8">
         <section>
-          <h1 className="mb-4 font-semibold text-2xl tracking-tight">
+          <h1 className="mb-4 font-semibold text-2xl tracking-tight font-display">
             Overview
           </h1>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -45,7 +52,9 @@ export function Dashboard({ spaces }: { spaces: SpaceWithTestimonials[] }) {
           {!spaces || spaces.length === 0 ? (
             <>
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="font-semibold text-xl tracking-tight">Spaces</h2>
+                <h2 className="font-semibold text-xl tracking-tight font-display">
+                  Spaces
+                </h2>
               </div>
               <div className="col-span-full flex h-[calc(100vh-400px)] flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
                 <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
@@ -63,7 +72,9 @@ export function Dashboard({ spaces }: { spaces: SpaceWithTestimonials[] }) {
           ) : (
             <>
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="font-semibold text-xl tracking-tight">Spaces</h2>
+                <h2 className="font-semibold text-xl tracking-tight font-display">
+                  Spaces
+                </h2>
                 <CreateSpaceDialog />
               </div>
 
@@ -74,11 +85,16 @@ export function Dashboard({ spaces }: { spaces: SpaceWithTestimonials[] }) {
                       <div className="flex items-center gap-2 overflow-hidden">
                         {" "}
                         {/* Added overflow-hidden */}
-                        <img
-                          src={space.logo ?? "/placeholder-image.svg"} // Added fallback
-                          alt={`${space.name} thumbnail`}
-                          className="h-8 w-8 flex-shrink-0 rounded-sm object-cover" // Added flex-shrink-0
-                        />
+                        <Avatar>
+                          <AvatarFallback>
+                            {space.name.slice(0, 2)}
+                          </AvatarFallback>
+                          <AvatarImage
+                            src={space.logo ?? "/placeholder-image.svg"} // Added fallback
+                            alt={`${space.name} thumbnail`}
+                            className="h-8 w-8 flex-shrink-0 rounded-sm object-cover" // Added flex-shrink-0
+                          />
+                        </Avatar>
                         <CardTitle className="truncate font-medium text-sm">
                           {" "}
                           {/* Added truncate */}
