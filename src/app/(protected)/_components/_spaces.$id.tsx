@@ -73,7 +73,7 @@ export function SpacePage({ spaceId }: { spaceId: string }) {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               {spaceData.testimonials.map((testimonial) => (
                 <TestimonialCard key={testimonial.id} testimonial={testimonial}>
-                  {!testimonial.published && (
+                  {!testimonial.isPublished && (
                     <PublishTestimonyDialog
                       testimonialId={testimonial.id}
                       testimonialText={testimonial.text}

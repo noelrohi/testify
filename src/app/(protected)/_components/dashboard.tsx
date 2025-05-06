@@ -143,15 +143,9 @@ export function Dashboard() {
                           />
                         </DropdownMenuContent>
                       </DropdownMenu>
-                      {/* --- End Dropdown Menu --- */}
                     </CardHeader>
                     <CardContent className="text-muted-foreground text-xs">
-                      {/* Ensure testimonials exist before accessing length */}
                       <p>Testimonials: {space.testimonials?.length ?? 0}</p>
-                      {/* Display custom message if available */}
-                      {space.customMessage && (
-                        <p className="mt-1 truncate">{space.customMessage}</p>
-                      )}
                     </CardContent>
                   </Card>
                 ))}

@@ -140,7 +140,7 @@ export const spaceRouter = createTRPCRouter({
         where: (table, { eq }) => eq(table.id, input.spaceId),
         with: {
           testimonials: {
-            where: (table, { eq }) => eq(table.published, true),
+            where: (table, { eq }) => eq(table.isPublished, true),
             orderBy: (table, { desc }) => desc(table.createdAt),
           },
         },
@@ -194,7 +194,7 @@ export const spaceRouter = createTRPCRouter({
       const [updatedTestimonial] = await db
         .update(TESTIMONIAL)
         .set({
-          published: true,
+          isPublished: true,
         })
         .where(and(eq(TESTIMONIAL.id, input.id)))
         .returning();

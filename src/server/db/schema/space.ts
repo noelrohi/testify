@@ -17,7 +17,7 @@ export const TESTIMONIAL = pgTable(
     updatedAt: timestamp("updated_at")
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
-    published: boolean("published").notNull().default(false),
+    isPublished: boolean("is_published").notNull().default(false),
     spaceId: text("space_id")
       .notNull()
       .references(() => SPACE.id),
