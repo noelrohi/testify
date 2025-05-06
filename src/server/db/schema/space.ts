@@ -22,7 +22,9 @@ export const TESTIMONIAL = pgTable(
     isPublished: boolean("is_published").notNull().default(false),
     spaceId: text("space_id")
       .notNull()
-      .references(() => SPACE.id),
+      .references(() => SPACE.id, {
+        onDelete: "cascade",
+      }),
   },
   (t) => [index("space_id_idx").on(t.spaceId)],
 );
@@ -51,7 +53,9 @@ export const SPACE = pgTable(
       .default(sql`CURRENT_TIMESTAMP`),
     userId: text("user_id")
       .notNull()
-      .references(() => user.id),
+      .references(() => user.id, {
+        onDelete: "cascade",
+      }),
   },
   (table) => [index("user_id_idx").on(table.userId)],
 );
