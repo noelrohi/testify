@@ -38,6 +38,8 @@ const TestimonialSchema = z
       .url()
       .nullable()
       .openapi({ example: "https://example.com/avatar.jpg" }),
+    position: z.string().nullish().openapi({ example: "CEO" }),
+    companyName: z.string().nullish().openapi({ example: "Acme Inc." }),
     createdAt: z.date().openapi({ example: "2024-01-01T12:00:00Z" }), // Representing timestamp as date for Zod
     updatedAt: z.date().openapi({ example: "2024-01-01T12:00:00Z" }),
     isPublished: z.boolean().openapi({ example: true }),
