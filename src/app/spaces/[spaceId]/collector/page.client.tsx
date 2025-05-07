@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { APP_DOMAIN, APP_URL, GITHUB_REPO_URL } from "@/constants";
+import { APP_DOMAIN, APP_NAME, APP_URL, GITHUB_REPO_URL } from "@/constants";
 import { useTRPC } from "@/lib/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
@@ -378,7 +378,7 @@ export function SpaceCollectPage({
             rel="noopener noreferrer"
             className="underline"
           >
-            {APP_DOMAIN} ❤️
+            {APP_NAME} ❤️
           </Link>
         </div>
       </div>

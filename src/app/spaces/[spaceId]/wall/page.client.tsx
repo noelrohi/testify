@@ -3,7 +3,7 @@
 import { Marquee } from "@/components/magicui/marquee";
 import { TestimonialCard } from "@/components/spaces/testimonial-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { APP_DOMAIN, APP_URL } from "@/constants";
+import { APP_DOMAIN, APP_NAME, APP_URL } from "@/constants";
 import { useTRPC } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -140,7 +140,7 @@ export function WallWidget({
           href={APP_URL}
           className="underline"
         >
-          {APP_DOMAIN} ❤️
+          {APP_NAME} ❤️
         </Link>
       </div>
     </div>

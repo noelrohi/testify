@@ -1,6 +1,6 @@
 import { FeaturesSectionWithHoverEffects } from "@/components/blocks/feature-section-with-hover-effects";
 import { Button } from "@/components/ui/button"; // Assuming Button component exists
-import { APP_DOMAIN } from "@/constants";
+import { APP_NAME } from "@/constants";
 import {
   ComputerIcon,
   GiftIcon,
@@ -62,7 +62,7 @@ export default function LandingPage() {
           className="flex items-center justify-center font-display font-semibold text-2xl lowercase"
           prefetch={false}
         >
-          {APP_DOMAIN}
+          {APP_NAME}
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6 items-center">
           <Link
