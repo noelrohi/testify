@@ -10,7 +10,7 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 import jsonContent from "stoker/openapi/helpers/json-content";
 import createMessageObjectSchema from "stoker/openapi/schemas/create-message-object";
-import SlugParamsSchema from "stoker/openapi/schemas/slug-params";
+import getParamsSchema from "stoker/openapi/schemas/get-params-schema";
 
 export const runtime = "nodejs";
 
@@ -108,9 +108,11 @@ const getTestimonialsRoute = createRoute({
 // Define the route for creating a testimonial
 const createTestimonialRoute = createRoute({
   method: "post",
-  path: "/testimonials/{slug}",
+  path: "/testimonials/{spaceId}",
   request: {
-    params: SlugParamsSchema,
+    params: getParamsSchema({
+      name: "spaceId",
+    }),
     body: jsonContent(CreateTestimonialSchema, "Data for the new testimonial."),
   },
   responses: {
@@ -164,7 +166,7 @@ app.openapi(getTestimonialsRoute, async (c) => {
 
 // Handler for creating a testimonial
 app.openapi(createTestimonialRoute, async (c) => {
-  const { slug: spaceId } = c.req.valid("param");
+  const { spaceId } = c.req.param();
   const testimonialData = c.req.valid("json");
 
   // Rate limiting
