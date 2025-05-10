@@ -10,23 +10,9 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 import jsonContent from "stoker/openapi/helpers/json-content";
 import createMessageObjectSchema from "stoker/openapi/schemas/create-message-object";
+import SlugParamsSchema from "stoker/openapi/schemas/slug-params";
 
 export const runtime = "nodejs";
-
-// Schema for the query parameter 'spaceId'
-const QuerySchema = z.object({
-  spaceId: z
-    .string()
-    .min(1, "Space ID cannot be empty.")
-    .openapi({
-      param: {
-        name: "spaceId",
-        in: "query",
-      },
-      example: "clxkzq8e00000qzj9f9f9f9f9",
-      description: "The ID of the space to retrieve testimonials for.",
-    }),
-});
 
 // Schema for a single testimonial, matching the database structure
 const TestimonialSchema = z
@@ -98,7 +84,9 @@ const getTestimonialsRoute = createRoute({
   method: "get",
   path: "/testimonials",
   request: {
-    query: QuerySchema,
+    query: z.object({
+      spaceId: z.string().min(1, "Space ID cannot be empty."),
+    }),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
@@ -120,9 +108,9 @@ const getTestimonialsRoute = createRoute({
 // Define the route for creating a testimonial
 const createTestimonialRoute = createRoute({
   method: "post",
-  path: "/testimonials/{spaceId}",
+  path: "/testimonials/{slug}",
   request: {
-    params: QuerySchema,
+    params: SlugParamsSchema,
     body: jsonContent(CreateTestimonialSchema, "Data for the new testimonial."),
   },
   responses: {
@@ -176,7 +164,7 @@ app.openapi(getTestimonialsRoute, async (c) => {
 
 // Handler for creating a testimonial
 app.openapi(createTestimonialRoute, async (c) => {
-  const { spaceId } = c.req.valid("param");
+  const { slug: spaceId } = c.req.valid("param");
   const testimonialData = c.req.valid("json");
 
   // Rate limiting
