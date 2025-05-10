@@ -9,6 +9,7 @@ import { handle } from "hono/vercel";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 import jsonContent from "stoker/openapi/helpers/json-content";
+import jsonContentRequired from "stoker/openapi/helpers/json-content-required";
 import createMessageObjectSchema from "stoker/openapi/schemas/create-message-object";
 
 export const runtime = "nodejs";
@@ -116,7 +117,10 @@ const createTestimonialRoute = createRoute({
         example: "clxkzq8e00000qzj9f9f9f9f9",
       }),
     }),
-    body: jsonContent(CreateTestimonialSchema, "Data for the new testimonial."),
+    body: jsonContentRequired(
+      CreateTestimonialSchema,
+      "Data for the new testimonial.",
+    ),
   },
   responses: {
     [HttpStatusCodes.CREATED]: jsonContent(
