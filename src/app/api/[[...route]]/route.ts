@@ -1,10 +1,15 @@
 import { env } from "@/env";
-import { db } from "@/server/db"; // Import db
-import { TESTIMONIAL } from "@/server/db/schema/space"; // Import TESTIMONIAL schema
+import { ratelimit } from "@/lib/ratelimit";
+import { db } from "@/server/db";
+import { TESTIMONIAL } from "@/server/db/schema/space";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
-import { and, eq } from "drizzle-orm"; // Import necessary drizzle functions
+import { and, eq } from "drizzle-orm";
 import { handle } from "hono/vercel";
+import * as HttpStatusCodes from "stoker/http-status-codes";
+import * as HttpStatusPhrases from "stoker/http-status-phrases";
+import jsonContent from "stoker/openapi/helpers/json-content";
+import createMessageObjectSchema from "stoker/openapi/schemas/create-message-object";
 
 export const runtime = "nodejs";
 
@@ -16,9 +21,9 @@ const QuerySchema = z.object({
     .openapi({
       param: {
         name: "spaceId",
-        in: "query", // Specify parameter is in query
+        in: "query",
       },
-      example: "clxkzq8e00000qzj9f9f9f9f9", // Example CUID
+      example: "clxkzq8e00000qzj9f9f9f9f9",
       description: "The ID of the space to retrieve testimonials for.",
     }),
 });
@@ -40,7 +45,7 @@ const TestimonialSchema = z
       .openapi({ example: "https://example.com/avatar.jpg" }),
     position: z.string().nullish().openapi({ example: "CEO" }),
     companyName: z.string().nullish().openapi({ example: "Acme Inc." }),
-    createdAt: z.date().openapi({ example: "2024-01-01T12:00:00Z" }), // Representing timestamp as date for Zod
+    createdAt: z.date().openapi({ example: "2024-01-01T12:00:00Z" }),
     updatedAt: z.date().openapi({ example: "2024-01-01T12:00:00Z" }),
     isPublished: z.boolean().openapi({ example: true }),
     spaceId: z.string().openapi({ example: "clxkzq8e00000qzj9f9f9f9f9" }),
@@ -72,95 +77,71 @@ const CreateTestimonialSchema = z
   })
   .openapi("CreateTestimonialPayload");
 
-// Schema for the successful response body
+// Schema for the successful response body for GET /testimonials
 const TestimonialsResponseSchema = z
   .object({
     testimonials: z.array(TestimonialSchema).openapi("TestimonialsList"),
   })
   .openapi("TestimonialsResponse");
 
-// Schema for error responses
-const ErrorSchema = z.object({
-  error: z.string().openapi({ example: "Database error" }),
-});
+// Standardized error schema using stoker
+const StandardErrorSchema =
+  createMessageObjectSchema().openapi("StandardError");
+
+// Schema for a rate limit error response
+const RateLimitErrorSchema = createMessageObjectSchema(
+  HttpStatusPhrases.TOO_MANY_REQUESTS,
+).openapi("RateLimitError");
 
 // Define the route for getting testimonials
 const getTestimonialsRoute = createRoute({
   method: "get",
-  path: "/testimonials", // Path relative to basePath
+  path: "/testimonials",
   request: {
-    query: QuerySchema, // Use query schema here
+    query: QuerySchema,
   },
   responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: TestimonialsResponseSchema,
-        },
-      },
-      description:
-        "Successfully retrieved published testimonials for the space.",
-    },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Bad Request - Invalid or missing spaceId.",
-    },
-    500: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Internal Server Error.",
-    },
+    [HttpStatusCodes.OK]: jsonContent(
+      TestimonialsResponseSchema,
+      "Successfully retrieved published testimonials for the space.",
+    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
+      StandardErrorSchema,
+      `${HttpStatusPhrases.BAD_REQUEST} - Invalid or missing spaceId.`,
+    ),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
+      StandardErrorSchema,
+      HttpStatusPhrases.INTERNAL_SERVER_ERROR,
+    ),
   },
-  tags: ["Testimonials"], // Add tags for OpenAPI documentation grouping
+  tags: ["Testimonials"],
 });
 
 // Define the route for creating a testimonial
 const createTestimonialRoute = createRoute({
   method: "post",
-  path: "/testimonials/{spaceId}", // Path relative to basePath, spaceId as path param
+  path: "/testimonials/{spaceId}",
   request: {
-    params: QuerySchema, // Reuse QuerySchema for spaceId path parameter
-    body: {
-      content: {
-        "application/json": {
-          schema: CreateTestimonialSchema,
-        },
-      },
-      description: "Data for the new testimonial.",
-    },
+    params: QuerySchema,
+    body: jsonContent(CreateTestimonialSchema, "Data for the new testimonial."),
   },
   responses: {
-    201: {
-      content: {
-        "application/json": {
-          schema: TestimonialSchema, // Return the full testimonial object
-        },
-      },
-      description: "Successfully created testimonial.",
-    },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Bad Request - Invalid input data.",
-    },
-    500: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Internal Server Error.",
-    },
+    [HttpStatusCodes.CREATED]: jsonContent(
+      TestimonialSchema,
+      "Successfully created testimonial.",
+    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
+      StandardErrorSchema,
+      `${HttpStatusPhrases.BAD_REQUEST} - Invalid input data.`,
+    ),
+    [HttpStatusCodes.TOO_MANY_REQUESTS]: jsonContent(
+      RateLimitErrorSchema,
+      HttpStatusPhrases.TOO_MANY_REQUESTS,
+    ),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
+      StandardErrorSchema,
+      HttpStatusPhrases.INTERNAL_SERVER_ERROR,
+    ),
   },
   tags: ["Testimonials"],
 });
@@ -168,7 +149,7 @@ const createTestimonialRoute = createRoute({
 const app = new OpenAPIHono().basePath("/api");
 
 app.openapi(getTestimonialsRoute, async (c) => {
-  const { spaceId } = c.req.valid("query"); // Get validated spaceId from query
+  const { spaceId } = c.req.valid("query");
 
   try {
     const testimonials = await db.query.TESTIMONIAL.findMany({
@@ -179,57 +160,72 @@ app.openapi(getTestimonialsRoute, async (c) => {
       orderBy: (table, { desc }) => desc(table.createdAt),
     });
 
-    return c.json({ testimonials }, 200);
+    return c.json({ testimonials }, HttpStatusCodes.OK);
   } catch (error) {
     console.error("Failed to fetch testimonials:", error);
     const message =
       error instanceof Error ? error.message : "Unknown database error";
-    // Use the defined error schema
     return c.json(
       {
-        error: `Failed to retrieve testimonials: ${message}`,
+        message: `Failed to retrieve testimonials: ${message}`,
       },
-      500, // Explicitly set status code
+      HttpStatusCodes.INTERNAL_SERVER_ERROR,
     );
   }
 });
 
 // Handler for creating a testimonial
 app.openapi(createTestimonialRoute, async (c) => {
-  const { spaceId } = c.req.valid("param"); // Get spaceId from path parameters
+  const { spaceId } = c.req.valid("param");
   const testimonialData = c.req.valid("json");
+
+  // Rate limiting
+  const ip =
+    c.req.header("x-forwarded-for") ||
+    c.req.header("cf-connecting-ip") ||
+    c.req.raw.headers.get("REMOTE_ADDR") ||
+    "anonymous";
+  const { success, limit, remaining, reset } = await ratelimit.limit(
+    `testimonial_creation_ip:${ip}`,
+  );
+
+  if (!success) {
+    return c.json(
+      {
+        message: HttpStatusPhrases.TOO_MANY_REQUESTS,
+      },
+      HttpStatusCodes.TOO_MANY_REQUESTS,
+    );
+  }
 
   try {
     const newTestimonial = await db
       .insert(TESTIMONIAL)
       .values({
         ...testimonialData,
-        spaceId, // Add spaceId from path param
-        isPublished: false, // Default to not published
+        spaceId,
+        isPublished: false,
       })
-      .returning() // Return all columns of the inserted row
-      .then((res) => res[0]); // Drizzle returns an array, we expect one row
+      .returning()
+      .then((res) => res[0]);
 
     if (!newTestimonial) {
-      return c.json({ error: "Failed to create testimonial record." }, 500);
+      return c.json(
+        { message: "Failed to create testimonial record." },
+        HttpStatusCodes.INTERNAL_SERVER_ERROR,
+      );
     }
 
-    // Convert date fields to Date objects if they are strings, or ensure they are in the correct format.
-    // The 'returning()' clause from Drizzle with Postgres should return Date objects for timestamp fields.
-    // If they were strings, you'd do:
-    // newTestimonial.createdAt = new Date(newTestimonial.createdAt);
-    // newTestimonial.updatedAt = new Date(newTestimonial.updatedAt);
-
-    return c.json(newTestimonial, 201);
+    return c.json(newTestimonial, HttpStatusCodes.CREATED);
   } catch (error) {
     console.error("Failed to create testimonial:", error);
     const message =
       error instanceof Error ? error.message : "Unknown database error";
     return c.json(
       {
-        error: `Failed to create testimonial: ${message}`,
+        message: `Failed to create testimonial: ${message}`,
       },
-      500,
+      HttpStatusCodes.INTERNAL_SERVER_ERROR,
     );
   }
 });
@@ -239,8 +235,8 @@ app.doc("/doc", {
   openapi: "3.0.0",
   info: {
     version: "1.0.0",
-    title: "Testify API", // Updated title
-    description: "API for managing Testify spaces and testimonials.", // Added description
+    title: "Testify API",
+    description: "API for managing Testify spaces and testimonials.",
   },
   servers: [
     {
@@ -253,4 +249,4 @@ app.doc("/doc", {
 app.get("/reference", Scalar({ url: "/api/doc" }));
 
 export const GET = handle(app);
-export const POST = handle(app); // Keep POST in case other methods are added later
+export const POST = handle(app);
