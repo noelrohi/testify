@@ -229,7 +229,11 @@ app.doc("/doc", {
   servers: [
     {
       url: `${env.NEXT_PUBLIC_APP_URL}`,
-      description: "Current environment",
+      description: "Production environment",
+    },
+    {
+      url: "http://localhost:3000",
+      description: "Local environment",
     },
   ],
 });
