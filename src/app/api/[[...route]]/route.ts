@@ -47,6 +47,31 @@ const TestimonialSchema = z
   })
   .openapi("Testimonial");
 
+// Schema for creating a new testimonial (request body)
+const CreateTestimonialSchema = z
+  .object({
+    authorName: z
+      .string()
+      .min(1, "Author name cannot be empty.")
+      .openapi({ example: "Jane Doe" }),
+    text: z
+      .string()
+      .min(1, "Testimonial text cannot be empty.")
+      .openapi({ example: "Absolutely fantastic!" }),
+    socialUrl: z
+      .string()
+      .url("Invalid social URL.")
+      .openapi({ example: "https://linkedin.com/in/janedoe" }),
+    imageUrl: z
+      .string()
+      .url("Invalid image URL.")
+      .nullable()
+      .openapi({ example: "https://example.com/avatar_jane.jpg" }),
+    position: z.string().nullish().openapi({ example: "CTO" }),
+    companyName: z.string().nullish().openapi({ example: "Innovate Corp" }),
+  })
+  .openapi("CreateTestimonialPayload");
+
 // Schema for the successful response body
 const TestimonialsResponseSchema = z
   .object({
@@ -96,6 +121,50 @@ const getTestimonialsRoute = createRoute({
   tags: ["Testimonials"], // Add tags for OpenAPI documentation grouping
 });
 
+// Define the route for creating a testimonial
+const createTestimonialRoute = createRoute({
+  method: "post",
+  path: "/testimonials/{spaceId}", // Path relative to basePath, spaceId as path param
+  request: {
+    params: QuerySchema, // Reuse QuerySchema for spaceId path parameter
+    body: {
+      content: {
+        "application/json": {
+          schema: CreateTestimonialSchema,
+        },
+      },
+      description: "Data for the new testimonial.",
+    },
+  },
+  responses: {
+    201: {
+      content: {
+        "application/json": {
+          schema: TestimonialSchema, // Return the full testimonial object
+        },
+      },
+      description: "Successfully created testimonial.",
+    },
+    400: {
+      content: {
+        "application/json": {
+          schema: ErrorSchema,
+        },
+      },
+      description: "Bad Request - Invalid input data.",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: ErrorSchema,
+        },
+      },
+      description: "Internal Server Error.",
+    },
+  },
+  tags: ["Testimonials"],
+});
+
 const app = new OpenAPIHono().basePath("/api");
 
 app.openapi(getTestimonialsRoute, async (c) => {
@@ -121,6 +190,46 @@ app.openapi(getTestimonialsRoute, async (c) => {
         error: `Failed to retrieve testimonials: ${message}`,
       },
       500, // Explicitly set status code
+    );
+  }
+});
+
+// Handler for creating a testimonial
+app.openapi(createTestimonialRoute, async (c) => {
+  const { spaceId } = c.req.valid("param"); // Get spaceId from path parameters
+  const testimonialData = c.req.valid("json");
+
+  try {
+    const newTestimonial = await db
+      .insert(TESTIMONIAL)
+      .values({
+        ...testimonialData,
+        spaceId, // Add spaceId from path param
+        isPublished: false, // Default to not published
+      })
+      .returning() // Return all columns of the inserted row
+      .then((res) => res[0]); // Drizzle returns an array, we expect one row
+
+    if (!newTestimonial) {
+      return c.json({ error: "Failed to create testimonial record." }, 500);
+    }
+
+    // Convert date fields to Date objects if they are strings, or ensure they are in the correct format.
+    // The 'returning()' clause from Drizzle with Postgres should return Date objects for timestamp fields.
+    // If they were strings, you'd do:
+    // newTestimonial.createdAt = new Date(newTestimonial.createdAt);
+    // newTestimonial.updatedAt = new Date(newTestimonial.updatedAt);
+
+    return c.json(newTestimonial, 201);
+  } catch (error) {
+    console.error("Failed to create testimonial:", error);
+    const message =
+      error instanceof Error ? error.message : "Unknown database error";
+    return c.json(
+      {
+        error: `Failed to create testimonial: ${message}`,
+      },
+      500,
     );
   }
 });
