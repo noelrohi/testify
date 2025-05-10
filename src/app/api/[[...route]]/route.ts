@@ -10,7 +10,6 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 import jsonContent from "stoker/openapi/helpers/json-content";
 import createMessageObjectSchema from "stoker/openapi/schemas/create-message-object";
-import getParamsSchema from "stoker/openapi/schemas/get-params-schema";
 
 export const runtime = "nodejs";
 
@@ -110,8 +109,12 @@ const createTestimonialRoute = createRoute({
   method: "post",
   path: "/testimonials/{spaceId}",
   request: {
-    params: getParamsSchema({
-      name: "spaceId",
+    params: z.object({
+      spaceId: z.string().openapi({
+        description:
+          "Identifier of the space to which the testimonial will be added.",
+        example: "clxkzq8e00000qzj9f9f9f9f9",
+      }),
     }),
     body: jsonContent(CreateTestimonialSchema, "Data for the new testimonial."),
   },
