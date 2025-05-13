@@ -11,6 +11,7 @@ import * as HttpStatusPhrases from "stoker/http-status-phrases";
 import jsonContent from "stoker/openapi/helpers/json-content";
 import jsonContentRequired from "stoker/openapi/helpers/json-content-required";
 import createMessageObjectSchema from "stoker/openapi/schemas/create-message-object";
+import { cors } from "hono/cors";
 
 export const runtime = "nodejs";
 
@@ -144,6 +145,8 @@ const createTestimonialRoute = createRoute({
 });
 
 const app = new OpenAPIHono().basePath("/api");
+
+app.use("/api/*", cors());
 
 app.openapi(getTestimonialsRoute, async (c) => {
   const { spaceId } = c.req.valid("query");
